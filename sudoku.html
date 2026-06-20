@@ -118,7 +118,142 @@
     .act-btn.theme-btn { background: linear-gradient(135deg,#ff6b6b,#feca57,#48dbfb,#ff9ff3,#54a0ff); background-size: 300% 300%; animation: rainbowShift 4s ease infinite; border-color: transparent; color: #fff; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
     .act-btn.theme-btn:hover { animation-duration: 1s; box-shadow: 0 6px 24px rgba(255,107,107,0.45); }
     @keyframes rainbowShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-    @media(max-width:620px){:root{--cell-size:38px}.cell{font-size:.95rem}.cell-notes span{font-size:.3rem}.game-layout{flex-direction:column;align-items:center}.side-panel{flex-direction:row;flex-wrap:wrap;justify-content:center;min-width:unset;width:100%}.numpad,.action-panel,.progress-wrap{flex:1;min-width:180px}}
+    /* ── Mobile-First Responsive System ── */
+    @media(max-width:767px){
+      /* ── Layout ── */
+      #app { padding: 12px 10px 180px; }
+      header { margin-bottom: 12px; }
+      .logo { padding: 6px 14px; margin-bottom: 8px; }
+      .logo-icon { width: 28px; height: 28px; }
+      .logo-text { font-size: .85rem; }
+      h1 { font-size: 1.6rem; letter-spacing: -.5px; }
+      .subtitle { font-size: .75rem; margin-top: 3px; }
+      /* ── Difficulty buttons ── */
+      .diff-row { gap: 6px; margin-bottom: 12px; }
+      .diff-btn { font-size: .72rem; padding: 5px 11px; }
+      /* ── Stat bar ── */
+      .stat-bar { gap: 6px; margin-bottom: 12px; }
+      .stat-card { padding: 7px 10px; gap: 6px; border-radius: 10px; }
+      .stat-icon { font-size: .95rem; }
+      .stat-label { font-size: .6rem; }
+      .stat-value { font-size: .9rem; }
+      /* ── Game layout ── */
+      .game-layout { flex-direction: column; align-items: center; gap: 10px; }
+      /* ── Board ── */
+      :root { --cell-size: min(calc((100vw - 40px) / 9), 52px); }
+      .board-wrap { padding: 10px; border-radius: 16px; }
+      #board { border-radius: 8px; }
+      .cell { font-size: clamp(.75rem, 4vw, 1.1rem); }
+      .cell-notes span { font-size: clamp(.28rem, 1.2vw, .38rem); }
+      /* ── Side panel becomes hidden on mobile (replaced by bottom bar) ── */
+      .side-panel { display: none !important; }
+      /* ── Mobile bottom toolbar ── */
+      #mobile-bar {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 50;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-top: 1px solid var(--border-strong);
+        box-shadow: 0 -8px 32px rgba(120,100,200,0.12);
+        padding: 8px 10px max(10px, env(safe-area-inset-bottom));
+        gap: 8px;
+        transition: background .4s, border-color .4s;
+      }
+      /* Number pad row */
+      #mobile-numpad {
+        display: grid;
+        grid-template-columns: repeat(9,1fr);
+        gap: 5px;
+      }
+      #mobile-numpad .m-num-btn {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: clamp(.85rem, 4.5vw, 1.15rem);
+        font-weight: 700;
+        aspect-ratio: 1;
+        width: 100%;
+        border: 1.5px solid var(--border-strong);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.85);
+        color: var(--text);
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: transform .1s, background .15s;
+        box-shadow: 0 2px 6px rgba(120,100,200,0.10);
+        -webkit-tap-highlight-color: transparent;
+        position: relative; overflow: hidden;
+      }
+      #mobile-numpad .m-num-btn::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(135deg,var(--accent),var(--accent2));
+        opacity: 0; transition: opacity .15s;
+      }
+      #mobile-numpad .m-num-btn:active { transform: scale(.88); }
+      #mobile-numpad .m-num-btn:active::after { opacity: .18; }
+      /* Action buttons row */
+      #mobile-actions {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+      }
+      #mobile-actions::-webkit-scrollbar { display: none; }
+      #mobile-actions .m-act-btn {
+        font-family: 'Outfit', sans-serif;
+        font-size: .75rem;
+        font-weight: 700;
+        white-space: nowrap;
+        padding: 8px 13px;
+        border-radius: 50px;
+        border: 1.5px solid var(--border-strong);
+        background: rgba(255,255,255,0.85);
+        color: var(--text);
+        cursor: pointer;
+        display: flex; align-items: center; gap: 5px;
+        flex-shrink: 0;
+        transition: transform .1s, background .15s;
+        -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 2px 6px rgba(120,100,200,0.10);
+      }
+      #mobile-actions .m-act-btn:active { transform: scale(.93); }
+      #mobile-actions .m-act-btn.primary {
+        background: linear-gradient(135deg,var(--accent),var(--accent2));
+        border-color: transparent; color: white;
+        box-shadow: 0 3px 14px rgba(124,110,250,0.35);
+      }
+      #mobile-actions .m-act-btn.danger { color: var(--red); }
+      #mobile-actions .m-act-btn.notes-active { color: var(--accent3); border-color: var(--accent3); }
+      #mobile-actions .m-act-btn.theme-btn {
+        background: linear-gradient(135deg,#ff6b6b,#feca57,#48dbfb,#ff9ff3,#54a0ff);
+        background-size: 300% 300%;
+        animation: rainbowShift 4s ease infinite;
+        border-color: transparent; color: #fff;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      }
+      /* Toast moves to top center on mobile */
+      #toast-container { right: 50%; transform: translateX(50%); top: 12px; width: 85vw; align-items: center; }
+      .toast { transform: translateY(-120%); width: 100%; justify-content: center; }
+      .toast.show { transform: translateY(0); }
+      /* Modal smaller padding */
+      .modal { padding: 32px 20px; }
+      .modal-emoji { font-size: 3rem; }
+      .modal h2 { font-size: 1.4rem; }
+      .modal-stat { padding: 10px 12px; }
+      .modal-stat-val { font-size: 1.1rem; }
+    }
+    /* Desktop: hide mobile bar */
+    @media(min-width:768px){
+      #mobile-bar { display: none !important; }
+    }
+    /* Tablet adjustments */
+    @media(min-width:620px) and (max-width:767px){
+      :root { --cell-size: min(calc((100vw - 60px) / 9), 56px); }
+    }
   </style>
 </head>
 <body>
@@ -162,6 +297,32 @@
         <button class="act-btn theme-btn" id="btn-theme" onclick="changeTheme()">&#127752; 變更色彩</button>
       </div>
     </div>
+  </div>
+</div>
+<!-- Mobile Bottom Toolbar (hidden on desktop via CSS) -->
+<div id="mobile-bar">
+  <!-- Number pad: 9 digits in one row -->
+  <div id="mobile-numpad">
+    <button class="m-num-btn" id="m-num-1" onclick="inputNumber(1)">1</button>
+    <button class="m-num-btn" id="m-num-2" onclick="inputNumber(2)">2</button>
+    <button class="m-num-btn" id="m-num-3" onclick="inputNumber(3)">3</button>
+    <button class="m-num-btn" id="m-num-4" onclick="inputNumber(4)">4</button>
+    <button class="m-num-btn" id="m-num-5" onclick="inputNumber(5)">5</button>
+    <button class="m-num-btn" id="m-num-6" onclick="inputNumber(6)">6</button>
+    <button class="m-num-btn" id="m-num-7" onclick="inputNumber(7)">7</button>
+    <button class="m-num-btn" id="m-num-8" onclick="inputNumber(8)">8</button>
+    <button class="m-num-btn" id="m-num-9" onclick="inputNumber(9)">9</button>
+  </div>
+  <!-- Action strip: scrollable pill buttons -->
+  <div id="mobile-actions">
+    <button class="m-act-btn primary" id="m-btn-new" onclick="newGame()">&#127922; 新遊戲</button>
+    <button class="m-act-btn" id="m-btn-notes" onclick="toggleNotes()">&#9999;&#65039; 筆記</button>
+    <button class="m-act-btn" id="m-btn-hint" onclick="useHint()">&#128161; 提示</button>
+    <button class="m-act-btn" id="m-btn-undo" onclick="undo()">&#8617;&#65039; 復原</button>
+    <button class="m-act-btn danger" id="m-btn-erase" onclick="erase()">&#128465;&#65039; 清除</button>
+    <button class="m-act-btn" id="m-btn-check" onclick="checkBoard()">&#9989; 驗證</button>
+    <button class="m-act-btn" id="m-btn-solve" onclick="solveBoard()">&#129302; 解答</button>
+    <button class="m-act-btn theme-btn" id="m-btn-theme" onclick="changeTheme()">&#127752; 色彩</button>
   </div>
 </div>
 <div class="overlay" id="win-overlay">
@@ -389,6 +550,12 @@ function applyTheme(t){
     .numpad-title,.action-title{ color:${t.textDim}; }
     .progress-label{ color:${t.textDim}; }
     .cell-notes span{ color:${t.accent3}; }
+    /* Mobile bar */
+    #mobile-bar{ background:${t.toastBg}; border-top-color:${t.borderStrong}; }
+    #mobile-numpad .m-num-btn{ background:${t.surface}; color:${t.text}; border-color:${t.borderStrong}; }
+    #mobile-actions .m-act-btn:not(.primary):not(.danger):not(.notes-active):not(.theme-btn){ background:${t.surface}; color:${t.text}; border-color:${t.borderStrong}; }
+    #mobile-actions .m-act-btn.danger{ color:${t.red}; border-color:${t.borderStrong}; background:${t.surface}; }
+    #mobile-actions .m-act-btn.notes-active{ color:${t.accent3}; border-color:${t.accent3}; background:${t.surface}; }
   `;
 }
 // ── Sudoku Logic ──
@@ -410,7 +577,18 @@ function clearNotesSameRCB(r,c,n){for(let i=0;i<9;i++){state.notes[r][i].delete(
 function erase(){if(state.selected===null)return;const[r,c]=state.selected;if(state.given[r][c])return;state.history.push({type:'fill',r,c,prev:state.board[r][c]});state.board[r][c]=0;state.notes[r][c].clear();renderCell(r,c);applyHighlights();updateProgress()}
 function undo(){if(state.history.length===0){toast('沒有可復原的操作','info');return}const h=state.history.pop();if(h.type==='fill'){state.board[h.r][h.c]=h.prev;renderCell(h.r,h.c)}else{state.notes[h.r][h.c]=new Set(h.prev);renderCell(h.r,h.c)}applyHighlights();updateProgress();toast('已復原','info')}
 function toggleNotes(){state.notesMode=!state.notesMode;updateNotesBtn();toast(state.notesMode?'筆記模式開啟':'筆記模式關閉','info')}
-function updateNotesBtn(){const btn=document.getElementById('btn-notes');btn.classList.toggle('notes-active',state.notesMode);btn.textContent=state.notesMode?'✏️ 筆記 ON':'✏️ 筆記模式'}
+function updateNotesBtn(){
+  // Desktop
+  const btn=document.getElementById('btn-notes');
+  btn.classList.toggle('notes-active',state.notesMode);
+  btn.textContent=state.notesMode?'✏️ 筆記 ON':'✏️ 筆記模式';
+  // Mobile
+  const mBtn=document.getElementById('m-btn-notes');
+  if(mBtn){
+    mBtn.classList.toggle('notes-active',state.notesMode);
+    mBtn.innerHTML=state.notesMode?'&#9999;&#65039; 筆記 ON':'&#9999;&#65039; 筆記';
+  }
+}
 function useHint(){if(state.hints<=0){toast('沒有提示了！','error-t');return}const empties=[];for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!state.given[r][c]&&state.board[r][c]===0)empties.push([r,c]);if(empties.length===0)return;const[r,c]=empties[Math.floor(Math.random()*empties.length)];state.hints--;state.score=Math.max(0,state.score-50);state.history.push({type:'fill',r,c,prev:0});state.board[r][c]=state.solution[r][c];state.notes[r][c].clear();clearNotesSameRCB(r,c,state.solution[r][c]);renderCell(r,c);const cell=document.getElementById(`cell-${r}-${c}`);cell.classList.add('correct-flash');setTimeout(()=>cell.classList.remove('correct-flash'),500);selectCell(r,c);updateStats();updateProgress();toast('已填入提示','info');checkWin()}
 function checkBoard(){let hasError=false;for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(!state.given[r][c]&&state.board[r][c]!==0&&state.board[r][c]!==state.solution[r][c]){const cell=document.getElementById(`cell-${r}-${c}`);cell.classList.add('error');setTimeout(()=>cell.classList.remove('error'),600);hasError=true}}toast(hasError?'發現錯誤，請修正':'目前填入全部正確！',hasError?'error-t':'success')}
 function solveBoard(){for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(!state.given[r][c]){state.board[r][c]=state.solution[r][c];state.notes[r][c].clear()}}state.score=0;renderBoard();updateStats();updateProgress();applyHighlights();toast('已顯示解答（不計分）','info');state.solved=true}
