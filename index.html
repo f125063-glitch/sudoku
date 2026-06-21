@@ -288,13 +288,13 @@
       <div class="action-panel">
         <div class="action-title">操作</div>
         <button class="act-btn primary" id="btn-new" onclick="newGame()">&#127922; 新遊戲</button>
-        <button class="act-btn" id="btn-notes" onclick="toggleNotes()">&#9999;&#65039; 筆記模式</button>
+        <button class="act-btn theme-btn" id="btn-theme" onclick="changeTheme()">&#127752; 變更色彩</button>
         <button class="act-btn" id="btn-hint" onclick="useHint()">&#128161; 使用提示</button>
         <button class="act-btn" id="btn-undo" onclick="undo()">&#8617;&#65039; 復原</button>
         <button class="act-btn danger" id="btn-erase" onclick="erase()">&#128465;&#65039; 清除</button>
         <button class="act-btn" id="btn-check" onclick="checkBoard()">&#9989; 驗證</button>
         <button class="act-btn" id="btn-solve" onclick="solveBoard()">&#129302; 解答</button>
-        <button class="act-btn theme-btn" id="btn-theme" onclick="changeTheme()">&#127752; 變更色彩</button>
+        <button class="act-btn" id="btn-notes" onclick="toggleNotes()">&#9999;&#65039; 筆記模式</button>
       </div>
     </div>
   </div>
@@ -316,13 +316,13 @@
   <!-- Action strip: scrollable pill buttons -->
   <div id="mobile-actions">
     <button class="m-act-btn primary" id="m-btn-new" onclick="newGame()">&#127922; 新遊戲</button>
-    <button class="m-act-btn" id="m-btn-notes" onclick="toggleNotes()">&#9999;&#65039; 筆記</button>
+    <button class="m-act-btn theme-btn" id="m-btn-theme" onclick="changeTheme()">&#127752; 色彩</button>
     <button class="m-act-btn" id="m-btn-hint" onclick="useHint()">&#128161; 提示</button>
     <button class="m-act-btn" id="m-btn-undo" onclick="undo()">&#8617;&#65039; 復原</button>
     <button class="m-act-btn danger" id="m-btn-erase" onclick="erase()">&#128465;&#65039; 清除</button>
     <button class="m-act-btn" id="m-btn-check" onclick="checkBoard()">&#9989; 驗證</button>
     <button class="m-act-btn" id="m-btn-solve" onclick="solveBoard()">&#129302; 解答</button>
-    <button class="m-act-btn theme-btn" id="m-btn-theme" onclick="changeTheme()">&#127752; 色彩</button>
+    <button class="m-act-btn" id="m-btn-notes" onclick="toggleNotes()">&#9999;&#65039; 筆記</button>
   </div>
 </div>
 <div class="overlay" id="win-overlay">
@@ -564,10 +564,10 @@ function solveSudoku(board,randomize=false){for(let r=0;r<9;r++){for(let c=0;c<9
 function isValid(board,r,c,n){for(let i=0;i<9;i++){if(board[r][i]===n&&i!==c)return false;if(board[i][c]===n&&i!==r)return false}const br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3;for(let i=0;i<3;i++)for(let j=0;j<3;j++){if(board[br+i][bc+j]===n&&(br+i!==r||bc+j!==c))return false}return true}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function countSolutions(board,limit=2){let count=0;function bt(b){for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(b[r][c]===0){for(let n=1;n<=9;n++){if(isValid(b,r,c,n)){b[r][c]=n;bt(b);b[r][c]=0;if(count>=limit)return}}return}}count++}const copy=board.map(r=>[...r]);bt(copy);return count}
-const DIFFICULTY={easy:{remove:30,hints:5},medium:{remove:42,hints:3},hard:{remove:52,hints:2},expert:{remove:60,hints:1}};
+const DIFFICULTY={easy:{remove:30,hints:99,maxMistakes:99},medium:{remove:42,hints:66,maxMistakes:66},hard:{remove:52,hints:16,maxMistakes:16},expert:{remove:60,hints:9,maxMistakes:9}};
 function createPuzzle(diff){const solution=generateFullBoard();const puzzle=solution.map(r=>[...r]);const cells=shuffle([...Array(81).keys()]);let removed=0;for(const idx of cells){if(removed>=DIFFICULTY[diff].remove)break;const r=Math.floor(idx/9),c=idx%9;const backup=puzzle[r][c];puzzle[r][c]=0;if(countSolutions(puzzle)===1)removed++;else puzzle[r][c]=backup}return{puzzle,solution}}
 let state={puzzle:null,solution:null,board:null,given:null,notes:null,selected:null,mistakes:0,maxMistakes:3,hints:3,score:0,notesMode:false,history:[],elapsed:0,timerInterval:null,difficulty:'medium',solved:false,failed:false};
-function newGame(){if(state.timerInterval)clearInterval(state.timerInterval);const diff=state.difficulty;const{puzzle,solution}=createPuzzle(diff);state.puzzle=puzzle;state.solution=solution;state.board=puzzle.map(r=>[...r]);state.given=puzzle.map(r=>r.map(v=>v!==0));state.notes=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));state.selected=null;state.mistakes=0;state.hints=DIFFICULTY[diff].hints;state.score=0;state.notesMode=false;state.history=[];state.elapsed=0;state.solved=false;state.failed=false;renderBoard();updateStats();updateProgress();updateNotesBtn();state.timerInterval=setInterval(()=>{if(state.solved||state.failed)return;state.elapsed++;updateTimer()},1000)}
+function newGame(){if(state.timerInterval)clearInterval(state.timerInterval);const diff=state.difficulty;const{puzzle,solution}=createPuzzle(diff);state.puzzle=puzzle;state.solution=solution;state.board=puzzle.map(r=>[...r]);state.given=puzzle.map(r=>r.map(v=>v!==0));state.notes=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));state.selected=null;state.mistakes=0;state.maxMistakes=DIFFICULTY[diff].maxMistakes;state.hints=DIFFICULTY[diff].hints;state.score=0;state.notesMode=false;state.history=[];state.elapsed=0;state.solved=false;state.failed=false;renderBoard();updateStats();updateProgress();updateNotesBtn();state.timerInterval=setInterval(()=>{if(state.solved||state.failed)return;state.elapsed++;updateTimer()},1000)}
 function renderBoard(){const el=document.getElementById('board');el.innerHTML='';for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.createElement('div');cell.className='cell';cell.dataset.row=r;cell.dataset.col=c;cell.id=`cell-${r}-${c}`;if(state.given[r][c]){cell.classList.add('given');cell.textContent=state.board[r][c]}else if(state.board[r][c]!==0){cell.classList.add('user-filled');cell.textContent=state.board[r][c]}else{const ns=state.notes[r][c];if(ns.size>0){const grid=document.createElement('div');grid.className='cell-notes';for(let n=1;n<=9;n++){const s=document.createElement('span');s.textContent=ns.has(n)?n:'';grid.appendChild(s)}cell.appendChild(grid)}}cell.addEventListener('click',()=>selectCell(r,c));el.appendChild(cell)}}
 function renderCell(r,c){const cell=document.getElementById(`cell-${r}-${c}`);if(!cell)return;cell.className='cell';if(state.given[r][c])cell.classList.add('given');else cell.classList.add('user-filled');cell.innerHTML='';if(state.board[r][c]!==0){cell.textContent=state.board[r][c]}else{const ns=state.notes[r][c];if(ns.size>0){const grid=document.createElement('div');grid.className='cell-notes';for(let n=1;n<=9;n++){const s=document.createElement('span');s.textContent=ns.has(n)?n:'';grid.appendChild(s)}cell.appendChild(grid)}}cell.dataset.row=r;cell.dataset.col=c;cell.addEventListener('click',()=>selectCell(r,c))}
 function applyHighlights(){for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.getElementById(`cell-${r}-${c}`);if(!cell)continue;cell.classList.remove('selected','highlighted','same-number')}if(state.selected===null)return;const[sr,sc]=state.selected;const sv=state.board[sr][sc];for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.getElementById(`cell-${r}-${c}`);if(!cell)continue;if(r===sr&&c===sc){cell.classList.add('selected');continue}const sameRow=r===sr,sameCol=c===sc;const sameBox=Math.floor(r/3)===Math.floor(sr/3)&&Math.floor(c/3)===Math.floor(sc/3);if(sameRow||sameCol||sameBox)cell.classList.add('highlighted');if(sv!==0&&state.board[r][c]===sv)cell.classList.add('same-number')}}
