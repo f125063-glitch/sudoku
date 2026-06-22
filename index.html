@@ -565,8 +565,68 @@ function solveSudoku(board,randomize=false){for(let r=0;r<9;r++){for(let c=0;c<9
 function isValid(board,r,c,n){for(let i=0;i<9;i++){if(board[r][i]===n&&i!==c)return false;if(board[i][c]===n&&i!==r)return false}const br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3;for(let i=0;i<3;i++)for(let j=0;j<3;j++){if(board[br+i][bc+j]===n&&(br+i!==r||bc+j!==c))return false}return true}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function countSolutions(board,limit=2){let count=0;function bt(b){for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(b[r][c]===0){for(let n=1;n<=9;n++){if(isValid(b,r,c,n)){b[r][c]=n;bt(b);b[r][c]=0;if(count>=limit)return}}return}}count++}const copy=board.map(r=>[...r]);bt(copy);return count}
-const DIFFICULTY={easy:{remove:30,hints:99,maxMistakes:99,initProgress:95},medium:{remove:42,hints:66,maxMistakes:66,initProgress:80},hard:{remove:52,hints:16,maxMistakes:16,initProgress:65},expert:{remove:60,hints:9,maxMistakes:9,initProgress:50}};
-function createPuzzle(diff){const solution=generateFullBoard();const puzzle=solution.map(r=>[...r]);const cells=shuffle([...Array(81).keys()]);let removed=0;for(const idx of cells){if(removed>=DIFFICULTY[diff].remove)break;const r=Math.floor(idx/9),c=idx%9;const backup=puzzle[r][c];puzzle[r][c]=0;if(countSolutions(puzzle)===1)removed++;else puzzle[r][c]=backup}return{puzzle,solution}}
+const DIFFICULTY={easy:{remove:11,hints:99,maxMistakes:99,initProgress:86},medium:{remove:16,hints:66,maxMistakes:66,initProgress:80},hard:{remove:19,hints:16,maxMistakes:16,initProgress:76},expert:{remove:22,hints:9,maxMistakes:9,initProgress:72}};
+function getBlankCells(diff) {
+  let degreeSeq = [];
+  if (diff === 'easy') degreeSeq = [2, 2, 1, 1, 1, 1, 1, 1, 1];
+  else if (diff === 'medium') degreeSeq = [3, 3, 2, 2, 2, 1, 1, 1, 1];
+  else if (diff === 'hard') degreeSeq = [3, 3, 3, 2, 2, 2, 2, 1, 1];
+  else if (diff === 'expert') degreeSeq = [4, 3, 3, 3, 2, 2, 2, 2, 1];
+
+  while (true) {
+    let rowTargets = shuffle([...degreeSeq]);
+    let colTargets = shuffle([...degreeSeq]);
+    let matrix = Array.from({length: 9}, () => Array(9).fill(0));
+    let colSums = Array(9).fill(0);
+    let success = true;
+    for (let r = 0; r < 9; r++) {
+      let needed = rowTargets[r];
+      let availableCols = [];
+      for (let c = 0; c < 9; c++) {
+        if (colSums[c] < colTargets[c]) availableCols.push(c);
+      }
+      if (availableCols.length < needed) { success = false; break; }
+      let buckets = {};
+      for (let c of availableCols) {
+         let remain = colTargets[c] - colSums[c];
+         if (!buckets[remain]) buckets[remain] = [];
+         buckets[remain].push(c);
+      }
+      let finalCols = [];
+      let remainKeys = Object.keys(buckets).map(Number).sort((a,b)=>b-a);
+      for (let k of remainKeys) finalCols.push(...shuffle(buckets[k]));
+      
+      let pickedCols = finalCols.slice(0, needed);
+      for (let c of pickedCols) {
+        matrix[r][c] = 1;
+        colSums[c]++;
+      }
+    }
+    if (success) {
+      let blanks = [];
+      for (let r=0; r<9; r++) {
+         for (let c=0; c<9; c++) {
+            if (matrix[r][c] === 1) blanks.push(r*9 + c);
+         }
+      }
+      return blanks;
+    }
+  }
+}
+function createPuzzle(diff){
+  while(true) {
+    const solution = generateFullBoard();
+    const blanks = getBlankCells(diff);
+    const puzzle = solution.map(r => [...r]);
+    for(const idx of blanks){
+      const r = Math.floor(idx/9), c = idx%9;
+      puzzle[r][c] = 0;
+    }
+    if(countSolutions(puzzle) === 1) {
+      return {puzzle, solution};
+    }
+  }
+}
 let state={puzzle:null,solution:null,board:null,given:null,notes:null,selected:null,mistakes:0,maxMistakes:3,hints:3,score:0,notesMode:false,history:[],elapsed:0,timerInterval:null,difficulty:'medium',solved:false,failed:false};
 function newGame(){if(state.timerInterval)clearInterval(state.timerInterval);const diff=state.difficulty;const{puzzle,solution}=createPuzzle(diff);state.puzzle=puzzle;state.solution=solution;state.board=puzzle.map(r=>[...r]);state.given=puzzle.map(r=>r.map(v=>v!==0));state.notes=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));state.selected=null;state.mistakes=0;state.maxMistakes=DIFFICULTY[diff].maxMistakes;state.hints=DIFFICULTY[diff].hints;state.score=0;state.notesMode=false;state.history=[];state.elapsed=0;state.solved=false;state.failed=false;renderBoard();updateStats();updateProgress();updateNotesBtn();state.timerInterval=setInterval(()=>{if(state.solved||state.failed)return;state.elapsed++;updateTimer()},1000)}
 function renderBoard(){const el=document.getElementById('board');el.innerHTML='';for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.createElement('div');cell.className='cell';cell.dataset.row=r;cell.dataset.col=c;cell.id=`cell-${r}-${c}`;if(state.given[r][c]){cell.classList.add('given');cell.textContent=state.board[r][c]}else if(state.board[r][c]!==0){cell.classList.add('user-filled');cell.textContent=state.board[r][c];if(state.board[r][c]!==state.solution[r][c])cell.classList.add('error-persist')}else{const ns=state.notes[r][c];if(ns.size>0){const grid=document.createElement('div');grid.className='cell-notes';for(let n=1;n<=9;n++){const s=document.createElement('span');s.textContent=ns.has(n)?n:'';grid.appendChild(s)}cell.appendChild(grid)}}cell.addEventListener('click',()=>selectCell(r,c));el.appendChild(cell)}}
